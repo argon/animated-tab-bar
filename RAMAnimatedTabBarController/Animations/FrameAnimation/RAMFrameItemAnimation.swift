@@ -30,19 +30,19 @@ public class RAMFrameItemAnimation: RAMItemAnimation {
     public var selectedImage : UIImage!
 
     @IBInspectable public var isDeselectAnimation: Bool = true
-    @IBInspectable public var imagesPath: String!
+    @IBInspectable public var imagesKey: String!
 
     override public func awakeFromNib() {
 
-        guard let path = NSBundle.mainBundle().pathForResource(imagesPath, ofType:"plist") else {
-            fatalError("don't found plist")
+        guard let path = NSBundle.mainBundle().pathForResource("FrameItemAnimationImages", ofType:"plist") else {
+            fatalError("tab bar animation images not found")
         }
 
-        guard let dict : NSDictionary = NSDictionary(contentsOfFile: path) else {
+        guard let dict = NSDictionary(contentsOfFile: path) else {
             fatalError()
         }
 
-        guard let animationImagesName = dict["images"] as? Array<String> else {
+        guard let animationImagesName = dict[imagesKey] as? [String] else {
             fatalError()
         }
         createImagesArray(animationImagesName)
