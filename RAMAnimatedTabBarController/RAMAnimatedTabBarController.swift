@@ -193,7 +193,7 @@ public class RAMAnimatedTabBarController: UITabBarController {
             container.backgroundColor = (items as [RAMAnimatedTabBarItem])[index].bgDefaultColor
 
             container.addSubview(icon)
-            createConstraints(icon, container: container, size: itemImage.size, yOffset: -5)
+            createConstraints(icon, container: container, size: itemImage.size, yOffset: -(5 + item.imageInsets.bottom))
 
             container.addSubview(textLabel)
             let textLabelWidth = tabBar.frame.size.width / CGFloat(items.count) - 5.0
