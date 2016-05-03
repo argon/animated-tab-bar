@@ -251,13 +251,13 @@ public class RAMAnimatedTabBarController: UITabBarController {
         view.addConstraint(constH)
     }
 
-    private func createViewContainers() -> NSDictionary {
+    private func createViewContainers() -> [String: UIView] {
 
         guard let items = tabBar.items else {
             fatalError("add items in tabBar")
         }
 
-        var containersDict = [String: AnyObject]()
+        var containersDict = [String: UIView]()
 
         for index in 0..<items.count {
             let viewContainer = createViewContainer()
@@ -282,14 +282,9 @@ public class RAMAnimatedTabBarController: UITabBarController {
         let viewContainer = UIView();
         viewContainer.backgroundColor = UIColor.clearColor() // for test
         viewContainer.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(viewContainer)
-
-        // add gesture
-        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(RAMAnimatedTabBarController.tapHandler(_:)))
-        tapGesture.numberOfTouchesRequired = 1
-        viewContainer.addGestureRecognizer(tapGesture)
-
-        // add constrains
+        tabBar.addSubview(viewContainer)
+        
+        // add constraints
         let constY = NSLayoutConstraint(item: viewContainer,
             attribute: NSLayoutAttribute.Bottom,
             relatedBy: NSLayoutRelation.Equal,
@@ -313,48 +308,19 @@ public class RAMAnimatedTabBarController: UITabBarController {
     }
 
     // MARK: actions
-
-    func tapHandler(gesture:UIGestureRecognizer) {
-
-        guard let items = tabBar.items as? [RAMAnimatedTabBarItem] else {
-            fatalError("items must inherit RAMAnimatedTabBarItem")
-        }
-
-        guard let gestureView = gesture.view else {
-            return
-        }
-
-        let currentIndex = gestureView.tag
-
-        let controller = self.childViewControllers[currentIndex]
-
-        if let shouldSelect = delegate?.tabBarController?(self, shouldSelectViewController: controller)
-            where !shouldSelect {
-            return
-        }
-
-        if selectedIndex != currentIndex {
-            let animationItem : RAMAnimatedTabBarItem = items[currentIndex]
-            animationItem.playAnimation()
-
-            let deselectItem = items[selectedIndex]
-
-            let containerPrevious : UIView = deselectItem.iconView!.icon.superview!
-            containerPrevious.backgroundColor = items[currentIndex].bgDefaultColor
-
-            deselectItem.deselectAnimation()
-
-            let container : UIView = animationItem.iconView!.icon.superview!
-            container.backgroundColor = items[currentIndex].bgSelectedColor
-
-            selectedIndex = gestureView.tag
-            delegate?.tabBarController?(self, didSelectViewController: controller)
-
-        } else if selectedIndex == currentIndex {
-
-            if let navVC = self.viewControllers![selectedIndex] as? UINavigationController {
-                navVC.popToRootViewControllerAnimated(true)
+    
+    override public var selectedViewController: UIViewController? {
+        didSet {
+            guard let items = tabBar.items as? [RAMAnimatedTabBarItem] else {
+                fatalError("items must inherit RAMAnimatedTabBarItem")
             }
+            
+            guard let previousIndex = viewControllers?.indexOf( { oldValue == $0 }) where selectedIndex != previousIndex else {
+                return
+            }
+            
+            items[selectedIndex].playAnimation()
+            items[previousIndex].deselectAnimation()
         }
     }
 }
